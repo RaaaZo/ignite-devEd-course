@@ -3,34 +3,62 @@ import { motion } from 'framer-motion'
 import styled from 'styled-components'
 import { useSelector } from 'react-redux'
 import { StoreState } from '../ducks/store/store'
+import { useHistory } from 'react-router-dom'
+import { resizeImage } from '../utils/resizeImages'
 
-const Detail: React.FC<{}> = () => {
+import starEmpty from '../img/star-empty.png'
+import starFull from '../img/star-full.png'
+
+const Detail: React.FC<{ pathId: string }> = ({ pathId }) => {
   const { details, screenshots, isLoading } = useSelector((state: StoreState) => state.gameDetails)
+
+  const { goBack } = useHistory()
+
+  const exitDetailHandler = (e: any) => {
+    const element = e.target
+    if (element.classList.contains('shadow')) {
+      document.body.style.overflow = 'auto'
+      goBack()
+    }
+  }
+
+  // Stars Logic
+  const getStars = (): JSX.Element[] => {
+    const stars = []
+    const rating = Math.floor(details!.rating)
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        stars.push(<img alt='star' key={i} src={starFull} />)
+      } else {
+        stars.push(<img alt='star' key={i} src={starEmpty} />)
+      }
+    }
+
+    return stars
+  }
 
   return (
     <>
+      {isLoading && <h3>Loading...</h3>}
       {!isLoading && details && (
         <>
-          <CardShadow>
-            <StyledDetail>
+          <CardShadow className='shadow' onClick={exitDetailHandler}>
+            <StyledDetail layoutId={pathId}>
               <Stats>
-                <div className='rating'>
-                  <h3>{details.name}</h3>
+                <h3>{details.name}</h3>
+                <div className='stars'>
                   <p>Rating: {details?.rating}</p>
+                  {getStars()}
                 </div>
-
-                <Info>
-                  <h3>Platforms</h3>
-                  <Platforms>
-                    {details.platforms.map(({ platform: { id, image_background, name } }) => (
-                      <h3 key={id}>{name}</h3>
-                    ))}
-                  </Platforms>
-                </Info>
               </Stats>
 
               <Media>
-                <img src={details.background_image} alt={details?.name} />
+                <motion.img
+                  layoutId={`image ${pathId}`}
+                  loading='lazy'
+                  src={resizeImage(details.background_image, 1280)}
+                  alt={details?.name}
+                />
               </Media>
 
               <Description>
@@ -39,7 +67,7 @@ const Detail: React.FC<{}> = () => {
 
               <div className='gallery'>
                 {screenshots.map(({ id, image }) => (
-                  <img key={id} src={image} alt={`${id}`} />
+                  <img loading='lazy' key={id} src={resizeImage(image, 1280)} alt={`${id}`} />
                 ))}
               </div>
             </StyledDetail>
@@ -80,9 +108,12 @@ const StyledDetail = styled(motion.div)`
   position: absolute;
   left: 10%;
   color: #000;
+  z-index: 10;
 
   img {
     width: 100%;
+    height: 70vh;
+    object-fit: cover;
   }
 `
 
@@ -90,18 +121,11 @@ const Stats = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: space-between;
-`
-
-const Info = styled(motion.div)`
-  text-align: center;
-`
-
-const Platforms = styled(motion.div)`
-  display: flex;
-  justify-content: space-evenly;
 
   img {
-    margin-left: 3rem;
+    width: 1.3rem;
+    height: 1.3rem;
+    display: inline;
   }
 `
 

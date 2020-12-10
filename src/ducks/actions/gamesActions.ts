@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Dispatch } from 'redux'
-import { newGamesUrl, popularGamesUrl, upcomingGamesUrl } from '../../utils/api'
-import { FetchGames } from '../types'
+import { newGamesUrl, popularGamesUrl, searchGameUrl, upcomingGamesUrl } from '../../utils/api'
+import { ClearSearched, FetchGames, FetchSearchedGames } from '../types'
 
 interface FetchedGamesData {
   results: {
@@ -25,4 +25,23 @@ export const fetchGames = () => async (dispatch: Dispatch<FetchGames>) => {
       newGames: newGames.data.results,
     },
   })
+}
+
+export const fetchSearchGames = (game_name: string) => async (
+  dispatch: Dispatch<FetchSearchedGames>
+) => {
+  const searchGames = await axios.get<FetchedGamesData>(searchGameUrl(game_name))
+
+  dispatch({
+    type: 'FETCH_SEARCH_GAMES',
+    payload: {
+      searched: searchGames.data.results,
+    },
+  })
+}
+
+export const clearSearchedGames = (): ClearSearched => {
+  return {
+    type: 'CLEAR_SEARCHED',
+  }
 }

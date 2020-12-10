@@ -22,6 +22,17 @@ export interface FetchGames {
   }
 }
 
+export interface FetchSearchedGames {
+  type: 'FETCH_SEARCH_GAMES'
+  payload: {
+    searched: GamesPayload[]
+  }
+}
+
+export interface ClearSearched {
+  type: 'CLEAR_SEARCHED'
+}
+
 // Fetch Single Game
 export interface DetailsState {
   details: FetchedSingleGameData | null
